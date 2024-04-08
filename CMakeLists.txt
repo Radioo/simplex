@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(wxBUILD_SHARED OFF)
 
 # Set entry point to WinMain for Windows
-if (WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:WinMainCRTStartup")
-endif()
+#if (WIN32)
+#    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:WinMainCRTStartup")
+#endif()
 
 include(cmake/CPM.cmake)
 

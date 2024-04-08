@@ -19,11 +19,14 @@ private:
     std::uint8_t rows = 2;
     std::uint8_t columns = 2;
 
+    std::vector<std::vector<wxTextCtrl*>> table;
+
     void incrementRows(wxCommandEvent& event);
     void decrementRows(wxCommandEvent& event);
     void incrementColumns(wxCommandEvent& event);
     void decrementColumns(wxCommandEvent& event);
     void drawTable();
+    void onTextChange(wxCommandEvent& event);
 };
 
 

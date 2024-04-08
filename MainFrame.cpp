@@ -87,15 +87,57 @@ void MainFrame::decrementColumns(wxCommandEvent& event) {
 void MainFrame::drawTable() {
     auto* vSizer = new wxBoxSizer(wxVERTICAL);
 
+    table.resize(rows);
+    for(auto& row : table) {
+        row.resize(columns);
+    }
+
     for(int i = 0; i < rows; i++) {
         auto* hSizer = new wxBoxSizer(wxHORIZONTAL);
 
         for(int j = 0; j < columns; j++) {
             auto* textCtrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(20, 20));
             hSizer->Add(textCtrl, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+            table[i][j] = textCtrl;
+
+            textCtrl->Bind(wxEVT_TEXT, &MainFrame::onTextChange, this);
         }
         vSizer->Add(hSizer, 0, wxALIGN_CENTER);
     }
 
     tableVSizer->Add(vSizer, 0, wxALIGN_CENTER);
+}
+
+void MainFrame::onTextChange(wxCommandEvent& event) {
+    // Find the column of the text control that triggered the event
+    int eventColumn = -1;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < columns; j++) {
+            if(table[i][j] == event.GetEventObject()) {
+                eventColumn = j;
+                break;
+            }
+        }
+        if(eventColumn != -1) {
+            break;
+        }
+    }
+
+    // Calculate the maximum width of the text in the column
+    int maxWidth = 0;
+    for(int i = 0; i < rows; i++) {
+        int width = table[i][eventColumn]->GetTextExtent(table[i][eventColumn]->GetValue()).GetWidth();
+        if(width > maxWidth) {
+            maxWidth = width;
+        }
+    }
+
+    // Apply the maximum width to all text controls in the column
+    for(int i = 0; i < rows; i++) {
+        table[i][eventColumn]->SetMinSize(wxSize(maxWidth + 10, -1)); // +10 for padding
+    }
+
+    // Update the layout
+    Layout();
 }
