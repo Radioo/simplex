@@ -20,9 +20,11 @@ private:
     std::uint8_t columns = 2;
 
     std::vector<wxTextCtrl*> lastInputs;
+    std::vector<wxTextCtrl*> FxInput;
     wxTextCtrl** lastInput;
     wxTextCtrl*** textCtrl;
     wxComboBox** operatorCombo;
+    wxComboBox* operatorMinMax;
 
     std::vector<std::vector<wxTextCtrl*>> table;
 

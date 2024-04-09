@@ -153,6 +153,7 @@ void MainFrame::drawTable() {
     }
 
     lastInputs.resize(rows);
+    FxInput.resize(columns);
 
     operatorCombo = new wxComboBox*[rows];
     lastInput = new wxTextCtrl*[rows];
@@ -162,6 +163,22 @@ void MainFrame::drawTable() {
         textCtrl[i] = new wxTextCtrl*[columns];
     }
 
+    auto* hSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* FxText = new wxStaticText(this, wxID_ANY, "F(x) = ");
+    hSizer->Add(FxText, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+    
+    for(int i=0; i < columns; i++){
+        FxInput[i] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25));
+        hSizer->Add(FxInput[i], 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+        auto* xText = new wxStaticText(this, wxID_ANY, "x" + std::to_string(i+1));
+        hSizer->Add(xText,0,wxALL|wxALIGN_CENTER_VERTICAL, 5);
+    }
+    wxString strMinMax[] = { "max", "min" };
+    operatorMinMax = new wxComboBox(this, wxID_ANY, strMinMax[0], wxDefaultPosition, wxDefaultSize, WXSIZEOF(strMinMax), strMinMax, wxCB_READONLY);
+    hSizer->Add(operatorMinMax,0,wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+    vSizer->Add(hSizer, 0, wxALIGN_CENTER);
 
     for(int i = 0; i < rows; i++) {
         auto* hSizer = new wxBoxSizer(wxHORIZONTAL);
