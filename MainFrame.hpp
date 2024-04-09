@@ -19,14 +19,21 @@ private:
     std::uint8_t rows = 2;
     std::uint8_t columns = 2;
 
+    std::vector<wxTextCtrl*> lastInputs;
+    wxTextCtrl** lastInput;
+    wxTextCtrl*** textCtrl;
+    wxComboBox** operatorCombo;
+
     std::vector<std::vector<wxTextCtrl*>> table;
 
     void incrementRows(wxCommandEvent& event);
     void decrementRows(wxCommandEvent& event);
     void incrementColumns(wxCommandEvent& event);
     void decrementColumns(wxCommandEvent& event);
+    void getValue(wxCommandEvent& event);
     void drawTable();
     void onTextChange(wxCommandEvent& event);
+    void onTextChangeLastColumn(wxCommandEvent& event);
 };
 
 
