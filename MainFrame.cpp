@@ -87,8 +87,10 @@ void MainFrame::decrementColumns(wxCommandEvent& event) {
 
 void MainFrame::getValue(wxCommandEvent& event){
     wxString value;
+    double* FxInputD = new double[columns];
     double* lastInputD = new double[rows];
     double** textCtrlD = new double*[rows];
+    double doubleValue;
     
     for (int i = 0; i < rows; ++i) {
         textCtrlD[i] = new double[columns];
@@ -96,21 +98,30 @@ void MainFrame::getValue(wxCommandEvent& event){
 
 
     for (int i = 0; i < rows; i++) {
-        value = lastInput[i]->GetValue();
-        double doubleValue;
+        value = lastInputs[i]->GetValue();
         value.ToDouble(&doubleValue);
         lastInputD[i] = doubleValue;
     }
 
+    for(int i = 0; i < columns; i++){
+        value = FxInput[i]->GetValue();
+        value.ToDouble(&doubleValue);
+        FxInputD[i] = doubleValue;
+    }
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
             value = textCtrl[i][j]->GetValue();
-            double doubleValue;
             value.ToDouble(&doubleValue);
             textCtrlD[i][j] = doubleValue;
         }
     }
+
+    std::cout << "FxInputD:" << std::endl;
+    for (int i = 0; i < columns; ++i) {
+        std::cout << FxInputD[i] << " ";
+    }
+    std::cout << std::endl;
 
     std::cout << "lastInputD:" << std::endl;
     for (int i = 0; i < rows; ++i) {
@@ -135,8 +146,12 @@ void MainFrame::getValue(wxCommandEvent& event){
     }
     std::cout << std::endl;
 
+    wxString valueMinMax = operatorMinMax->GetStringSelection();
+    std::cout << valueMinMax << std::endl;
+
 
     delete[] lastInputD;
+    delete[] FxInputD;
     for (int i = 0; i < rows; ++i) {
         delete[] textCtrlD[i];
     }
