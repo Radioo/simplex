@@ -8,6 +8,8 @@
 #include <wx/wx.h>
 #include <cstdint>
 
+#include "SimplexSolver.cpp"
+
 class MainFrame : public wxFrame {
 public:
     MainFrame();
@@ -36,6 +38,9 @@ private:
     void drawTable();
     void onTextChange(wxCommandEvent& event);
     void onTextChangeLastColumn(wxCommandEvent& event);
+    void onTextChangeTargetFunction(wxCommandEvent& event);
+    static void displayResult(SimplexSolver& solver);
+    static std::string formatNumber(double number);
 };
 
 

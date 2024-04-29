@@ -91,72 +91,42 @@ void MainFrame::getValue(wxCommandEvent& event){
     double* lastInputD = new double[rows];
     double** textCtrlD = new double*[rows];
     double doubleValue;
-    
-    for (int i = 0; i < rows; ++i) {
-        textCtrlD[i] = new double[columns];
-    }
 
-
-    for (int i = 0; i < rows; i++) {
-        value = lastInputs[i]->GetValue();
-        value.ToDouble(&doubleValue);
-        lastInputD[i] = doubleValue;
-    }
-
-    for(int i = 0; i < columns; i++){
-        value = FxInput[i]->GetValue();
-        value.ToDouble(&doubleValue);
-        FxInputD[i] = doubleValue;
-    }
+    std::vector<std::vector<double>> constraints(rows, std::vector<double>(columns));
+    std::vector<double> rightHandSide(rows);
+    std::vector<double> objectiveFunction(columns);
+    std::vector<std::string> signs(rows);
+    bool isMaximization = operatorMinMax->GetStringSelection() == "max";
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
             value = textCtrl[i][j]->GetValue();
             value.ToDouble(&doubleValue);
-            textCtrlD[i][j] = doubleValue;
+            constraints[i][j] = doubleValue;
         }
     }
 
-    std::cout << "FxInputD:" << std::endl;
-    for (int i = 0; i < columns; ++i) {
-        std::cout << FxInputD[i] << " ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "lastInputD:" << std::endl;
-    for (int i = 0; i < rows; ++i) {
-        std::cout << lastInputD[i] << " ";
-    }
-    std::cout << std::endl;
-
-
-    std::cout << "textCtrlD:" << std::endl;
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < columns; ++j) {
-            std::cout << textCtrlD[i][j] << " ";
-        }
-        std::cout << std::endl;
+    for (int i = 0; i < rows; i++) {
+        value = lastInputs[i]->GetValue();
+        value.ToDouble(&doubleValue);
+        rightHandSide[i] = doubleValue;
     }
 
-    
+    for (int i = 0; i < columns; i++) {
+        value = FxInput[i]->GetValue();
+        value.ToDouble(&doubleValue);
+        objectiveFunction[i] = doubleValue;
+    }
 
-    for (int i = 0; i < rows; ++i) {
+    for (int i = 0; i < rows; i++) {
         wxString selectedOperator = operatorCombo[i]->GetStringSelection();
-        std::cout << selectedOperator << " ";
+        signs[i] = selectedOperator;
     }
-    std::cout << std::endl;
 
-    wxString valueMinMax = operatorMinMax->GetStringSelection();
-    std::cout << valueMinMax << std::endl;
+    SimplexSolver solver(constraints, rightHandSide, objectiveFunction, signs, isMaximization);
+    solver.solve();
 
-
-    delete[] lastInputD;
-    delete[] FxInputD;
-    for (int i = 0; i < rows; ++i) {
-        delete[] textCtrlD[i];
-    }
-    delete[] textCtrlD;
-    
+    displayResult(solver);
 }
 
 void MainFrame::drawTable() {
@@ -183,11 +153,12 @@ void MainFrame::drawTable() {
     hSizer->Add(FxText, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     
     for(int i=0; i < columns; i++){
-        FxInput[i] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25));
+        FxInput[i] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25), wxTE_CENTRE);
         hSizer->Add(FxInput[i], 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
         auto* xText = new wxStaticText(this, wxID_ANY, "x" + std::to_string(i+1));
         hSizer->Add(xText,0,wxALL|wxALIGN_CENTER_VERTICAL, 5);
+        FxInput[i]->Bind(wxEVT_TEXT, &MainFrame::onTextChangeTargetFunction, this);
     }
     wxString strMinMax[] = { "max", "min" };
     operatorMinMax = new wxComboBox(this, wxID_ANY, strMinMax[0], wxDefaultPosition, wxDefaultSize, WXSIZEOF(strMinMax), strMinMax, wxCB_READONLY);
@@ -199,7 +170,7 @@ void MainFrame::drawTable() {
         auto* hSizer = new wxBoxSizer(wxHORIZONTAL);
 
         for(int j = 0; j < columns; j++) {
-            textCtrl[i][j] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25));
+            textCtrl[i][j] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25), wxTE_CENTRE);
             auto* xText = new wxStaticText(this, wxID_ANY, "x" + std::to_string(j+1));
         
             hSizer->Add(textCtrl[i][j], 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
@@ -209,11 +180,11 @@ void MainFrame::drawTable() {
             table[i][j] = textCtrl[i][j];
             textCtrl[i][j]->Bind(wxEVT_TEXT, &MainFrame::onTextChange, this);
         }
-        wxString operators[] = { "=", "<", ">" };
+        wxString operators[] = { "=", "<=", ">=" };
         operatorCombo[i] = new wxComboBox(this, wxID_ANY, operators[0], wxDefaultPosition, wxDefaultSize, WXSIZEOF(operators), operators, wxCB_READONLY);
         hSizer->Add(operatorCombo[i],0,wxALL|wxALIGN_CENTER_VERTICAL, 5);
         
-        lastInputs[i] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25));
+        lastInputs[i] = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(25, 25), wxTE_CENTRE);
         lastInputs[i]->Bind(wxEVT_TEXT, &MainFrame::onTextChangeLastColumn, this);
         hSizer->Add(lastInputs[i],0,wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
@@ -225,6 +196,30 @@ void MainFrame::drawTable() {
         
     tableVSizer->Add(vSizer, 0, wxALIGN_CENTER);
     tableVSizer->Add(calculateButton, 0, wxALL|wxALIGN_CENTER, 5);
+}
+
+void MainFrame::onTextChangeTargetFunction(wxCommandEvent& event) {
+    int eventColumn = -1;
+    for(int i = 0; i < columns; i++) {
+        if (FxInput[i] == event.GetEventObject()) {
+            eventColumn = i;
+            break;
+        }
+    }
+
+    int maxWidth = 0;
+    for(int i = 0; i < columns; i++) {
+        int width = FxInput[i]->GetTextExtent(FxInput[i]->GetValue()).GetWidth();
+        if (width > maxWidth) {
+            maxWidth = width;
+        }
+    }
+
+    for(int i = 0; i < columns; i++) {
+        FxInput[i]->SetMinSize(wxSize(maxWidth + 10, -1));
+    }
+
+    Layout();
 }
 
 void MainFrame::onTextChangeLastColumn(wxCommandEvent& event) {
@@ -282,4 +277,27 @@ void MainFrame::onTextChange(wxCommandEvent& event) {
 
     // Update the layout
     Layout();
+}
+
+void MainFrame::displayResult(SimplexSolver &solver) {
+    wxString message = "Objective value: " + formatNumber(solver.getObjectiveValue()) + "\n";
+    message += "Solution: \n";
+    std::vector<double> solution = solver.getSolution();
+    auto solutionCount = solution.size();
+
+    for(int i = 0; i < solutionCount; i++) {
+        message += "x" + std::to_string(i + 1) + " = " + formatNumber(solution[i]) + "\n";
+    }
+
+    wxMessageBox(message, "Result", wxOK | wxICON_INFORMATION);
+}
+
+std::string MainFrame::formatNumber(double number) {
+    // Strip trailing zeros and remove the decimal point if the number is an integer
+    std::string str = std::to_string(number);
+    str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+    if(str.back() == '.') {
+        str.pop_back();
+    }
+    return str;
 }
