@@ -216,7 +216,7 @@ void MainFrame::onTextChangeTargetFunction(wxCommandEvent& event) {
     }
 
     for(int i = 0; i < columns; i++) {
-        FxInput[i]->SetMinSize(wxSize(maxWidth + 10, -1));
+        FxInput[i]->SetMinSize(wxSize(maxWidth + 30, -1));
     }
 
     Layout();
@@ -240,7 +240,7 @@ void MainFrame::onTextChangeLastColumn(wxCommandEvent& event) {
     }
 
     for(int i = 0; i < rows; i++) {
-        lastInputs[i]->SetMinSize(wxSize(maxWidth + 10, -1));
+        lastInputs[i]->SetMinSize(wxSize(maxWidth + 30, -1));
     }
 
     Layout();
@@ -272,7 +272,7 @@ void MainFrame::onTextChange(wxCommandEvent& event) {
 
     // Apply the maximum width to all text controls in the column
     for(int i = 0; i < rows; i++) {
-        table[i][eventColumn]->SetMinSize(wxSize(maxWidth + 10, -1)); // +10 for padding
+        table[i][eventColumn]->SetMinSize(wxSize(maxWidth + 30, -1)); // +10 for padding
     }
 
     // Update the layout
