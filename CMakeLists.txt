@@ -13,11 +13,17 @@ include(cmake/CPM.cmake)
 
 CPMAddPackage("gh:wxWidgets/wxWidgets@3.2.4")
 
-add_executable(simplex main.cpp
+set(SOURCES main.cpp
         App.cpp
         App.hpp
         MainFrame.cpp
         MainFrame.hpp
         SimplexSolver.cpp)
+
+if (WIN32)
+    add_executable(simplex WIN32 ${SOURCES})
+else()
+    add_executable(simplex ${SOURCES})
+endif()
 
 target_link_libraries(simplex PRIVATE wxcore wxnet)
